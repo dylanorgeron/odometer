@@ -3,6 +3,7 @@ import $ from 'jquery'
 class Odometer{
 	public digits:number[] = []
 	public digitPositions:number[] = []
+	public revolutions:number[] = []
 
 	constructor(
 		public startValue: number,
@@ -16,6 +17,8 @@ class Odometer{
 		const height = $(this.el).css('font-size').slice(0, -2)
 		$(container).css('height', height)
 		
+		const distanceToTravel = Math.abs(this.startValue - this.endValue)
+
 		//populate digit places
 		for(let i = 0; i < this.startValue.toString().length; i++){
 
@@ -31,6 +34,7 @@ class Odometer{
 			}
 
 			this.digitPositions.push(0)
+			this.revolutions[i] = Math.floor(distanceToTravel / 10**i)
 
 			//generate html
 			$(container).append(
@@ -40,6 +44,7 @@ class Odometer{
 				</div>`
 			)
 		}
+		this.revolutions.reverse()
 	}
 	async update(){
 		const container = $(this.el).children('.odometer-container')
@@ -47,47 +52,15 @@ class Odometer{
 		let scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
 		let top = scrollDirection === 'down' ? height - height * 2 : 0
 		let cutoff = scrollDirection === 'down' ? 0 : height - height * 2
-		let speed = 10
-
-		let spinning = true
-
-		//init top position for all digits
 		const htmlDigits = $(container).children('.digit')
+		const rpm = this.duration / this.revolutions[this.revolutions.length-1]
+
 		for(let i = 0; i < this.digitPositions.length; i++){
+			//init top position for all digits
 			$(htmlDigits).css('top', `${this.digitPositions[top]}px`)
+			//calculate number of revolutions needed to get each number to the right place
 		}
-
-
-		//get us out eventually
-		setTimeout(() => {
-			//stop the ride
-			spinning = false
-
-			//finish the loop with our final result
-			$(container).children('.digit').css('top', '0px')
-
-			//move to next reset position
-			for(let i = top; i <= cutoff; i++){
-				$(container).children('.digit').css('top', `${i}px`)
-			}
-			//push result to html
-			var resultPosition = scrollDirection === 'down' ? 0 : 1
-			for(let i = 0; i < this.digits.length; i++){
-				$($($(container).children('.digit')[i]).children()[resultPosition]).html(this.digits[i].toString())
-			}
-			//bring em in
-			top = 0
-			speed = 10
-			const finalLoop = setInterval(() =>{
-				$(container).children('.digit').css('top', `${top}px`)
-				top+= speed
-				if(top > cutoff){
-					$(container).children('.digit').css('top', `${cutoff}px`)
-					clearInterval(finalLoop)
-				} 
-			},1000/60)
-		}, this.duration)
-		
+	
 		//animate in the meantime
 		const loop = setInterval(() => {
 			//move elements
@@ -107,23 +80,29 @@ class Odometer{
 					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + 1
 					if(newVal === 9) newVal = 0
 					$($(htmlDigits[i]).children()[1]).html(newVal.toString())
+					
+					if(this.revolutions[i] > 0) 
+					{
+						this.revolutions[i]--
+					}
 				} 
 				//apply new height
-				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
-				if(scrollDirection === 'up'){
-					this.digitPositions[i] -= speed/10 - i * 2
-				}else{
-					this.digitPositions[i] += speed/10 + i * 2
+				if(this.revolutions[i] > 0){
+					$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
+					if(scrollDirection === 'up'){
+						this.digitPositions[i] -= 1000
+					}else{
+						this.digitPositions[i] += 1000
+					}
 				}
 			}
-			
-			//bail
-			if(!spinning) {
+			//all done, wrap it up
+			if(!this.revolutions.find((e) => e > 0)) {
 				clearInterval(loop)
 			}
 		},1000/60)
 	}
 }
   
-const odometer = new Odometer(1000, 296, 2000, $('#odometer'))
+const odometer = new Odometer(1000, 296, 1000, $('#odometer'))
 odometer.update()
