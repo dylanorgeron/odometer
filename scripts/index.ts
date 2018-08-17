@@ -2,6 +2,7 @@ import $ from 'jquery'
 
 class Odometer{
 	public digits:number[] = []
+	public digitPositions:number[] = []
 
 	constructor(
 		public startValue: number,
@@ -29,6 +30,8 @@ class Odometer{
 				this.digits.unshift(0)
 			}
 
+			this.digitPositions.push(0)
+
 			//generate html
 			$(container).append(
 				`<div class="digit">
@@ -44,9 +47,16 @@ class Odometer{
 		let scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
 		let top = scrollDirection === 'down' ? height - height * 2 : 0
 		let cutoff = scrollDirection === 'down' ? 0 : height - height * 2
-		let speed = 100
+		let speed = 10
 
 		let spinning = true
+
+		//init top position for all digits
+		const htmlDigits = $(container).children('.digit')
+		for(let i = 0; i < this.digitPositions.length; i++){
+			$(htmlDigits).css('top', `${this.digitPositions[top]}px`)
+		}
+
 
 		//get us out eventually
 		setTimeout(() => {
@@ -76,23 +86,20 @@ class Odometer{
 					clearInterval(finalLoop)
 				} 
 			},1000/60)
-
-
 		}, this.duration)
 		
 		//animate in the meantime
 		const loop = setInterval(() => {
 			//move elements
-			if(
-				(top < cutoff && scrollDirection === 'up') ||
-				(top > cutoff && scrollDirection === 'down')
-			){
-				//reset at cutoff
-				top = scrollDirection === 'down' ? height - height * 2 : 0
-				//increment numbers
-				const htmlDigits = $(container).children('.digit')
-				for(let i = 0; i < htmlDigits.length; i++){
-
+			const htmlDigits = $(container).children('.digit')
+			for(let i = 0; i < htmlDigits.length; i++){
+				//reset if needed
+				if(
+					(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
+					(this.digitPositions[i] > cutoff && scrollDirection === 'down')
+				){
+					this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
+					//increment numbers
 					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + 1
 					if(newVal === 9) newVal = 0
 					$($(htmlDigits[i]).children()[0]).html(newVal.toString())
@@ -100,14 +107,14 @@ class Odometer{
 					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + 1
 					if(newVal === 9) newVal = 0
 					$($(htmlDigits[i]).children()[1]).html(newVal.toString())
+				} 
+				//apply new height
+				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
+				if(scrollDirection === 'up'){
+					this.digitPositions[i] -= speed/10 - i * 2
+				}else{
+					this.digitPositions[i] += speed/10 + i * 2
 				}
-			} 
-
-			$(container).children('.digit').css('top', `${top}px`)
-			if(scrollDirection === 'up'){
-				top -= speed/10
-			}else{
-				top += speed/10
 			}
 			
 			//bail
