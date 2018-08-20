@@ -37,12 +37,21 @@ class Odometer{
 			this.revolutions[i] = Math.floor(distanceToTravel / 10**i)
 
 			//generate html
+			let firstPos = this.startValue < this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
+			let secondPos = this.startValue > this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
+
+			if(firstPos > 9) firstPos = 0
+			if(firstPos < 0) firstPos = 9
+			if(secondPos > 9) secondPos = 0
+			if(secondPos < 0) secondPos = 9
+
 			$(container).append(
 				`<div class="digit">
-				<div>1</div>
-				<div>0</div>
+				<div>${firstPos}</div>
+				<div>${secondPos}</div>
 				</div>`
 			)
+
 		}
 		this.revolutions.reverse()
 	}
@@ -58,7 +67,6 @@ class Odometer{
 		for(let i = 0; i < this.digitPositions.length; i++){
 			//init top position for all digits
 			$(htmlDigits).css('top', `${this.digitPositions[top]}px`)
-			//calculate number of revolutions needed to get each number to the right place
 		}
 	
 		//animate in the meantime
@@ -73,12 +81,15 @@ class Odometer{
 				){
 					this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
 					//increment numbers
-					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + 1
-					if(newVal === 9) newVal = 0
+					const increment = scrollDirection === 'down' ? -1 : 1
+					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
+					if(newVal > 9) newVal = 0
+					if(newVal < 0) newVal = 9
 					$($(htmlDigits[i]).children()[0]).html(newVal.toString())
 
-					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + 1
-					if(newVal === 9) newVal = 0
+					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + increment
+					if(newVal > 9) newVal = 0
+					if(newVal < 0) newVal = 9
 					$($(htmlDigits[i]).children()[1]).html(newVal.toString())
 					
 					if(this.revolutions[i] > 0) 
@@ -87,22 +98,28 @@ class Odometer{
 					}
 				} 
 				//apply new height
-				if(this.revolutions[i] > 0){
+				if(this.revolutions[i] > 0 || this.digits[i] != parseInt($($(htmlDigits[i]).children()[0]).html())){
 					$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 					if(scrollDirection === 'up'){
-						this.digitPositions[i] -= 1000
+						this.digitPositions[i] -= 10
 					}else{
-						this.digitPositions[i] += 1000
+						this.digitPositions[i] += 10
 					}
+				}else if(this.revolutions[i] === 0 && this.digits[i] === parseInt($($(htmlDigits[i]).children()[0]).html())){
+					$(htmlDigits[i]).css('top', `${cutoff}px`)
 				}
 			}
 			//all done, wrap it up
 			if(!this.revolutions.find((e) => e > 0)) {
+				for(let i = 0; i < htmlDigits.length; i++){
+					$($(htmlDigits[i]).html(this.digits[i].toString()))
+				}
+				$(htmlDigits).css('top', `${cutoff}px`)
 				clearInterval(loop)
 			}
 		},1000/60)
 	}
 }
   
-const odometer = new Odometer(1000, 296, 1000, $('#odometer'))
+const odometer = new Odometer(100, 79, 1000, $('#odometer'))
 odometer.update()
