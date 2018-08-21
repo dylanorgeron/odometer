@@ -33,10 +33,18 @@ class Odometer{
 			this.digitPositions.push(0)
 
 			//generate html
+			let firstPos = this.startValue < this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
+			let secondPos = this.startValue > this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
+
+			if(firstPos > 9) firstPos = 0
+			if(firstPos < 0) firstPos = 9
+			if(secondPos > 9) secondPos = 0
+			if(secondPos < 0) secondPos = 9
+
 			$(container).append(
 				`<div class="digit">
-				<div>1</div>
-				<div>0</div>
+				<div>${firstPos}</div>
+				<div>${secondPos}</div>
 				</div>`
 			)
 		}
@@ -63,29 +71,29 @@ class Odometer{
 			//stop the ride
 			spinning = false
 
-			//finish the loop with our final result
-			$(container).children('.digit').css('top', '0px')
+			// //finish the loop with our final result
+			// $(container).children('.digit').css('top', '0px')
 
-			//move to next reset position
-			for(let i = top; i <= cutoff; i++){
-				$(container).children('.digit').css('top', `${i}px`)
-			}
-			//push result to html
-			var resultPosition = scrollDirection === 'down' ? 0 : 1
-			for(let i = 0; i < this.digits.length; i++){
-				$($($(container).children('.digit')[i]).children()[resultPosition]).html(this.digits[i].toString())
-			}
-			//bring em in
-			top = 0
-			speed = 10
-			const finalLoop = setInterval(() =>{
-				$(container).children('.digit').css('top', `${top}px`)
-				top+= speed
-				if(top > cutoff){
-					$(container).children('.digit').css('top', `${cutoff}px`)
-					clearInterval(finalLoop)
-				} 
-			},1000/60)
+			// //move to next reset position
+			// for(let i = top; i <= cutoff; i++){
+			// 	$(container).children('.digit').css('top', `${i}px`)
+			// }
+			// //push result to html
+			// var resultPosition = scrollDirection === 'down' ? 0 : 1
+			// for(let i = 0; i < this.digits.length; i++){
+			// 	$($($(container).children('.digit')[i]).children()[resultPosition]).html(this.digits[i].toString())
+			// }
+			// //bring em in
+			// top = 0
+			// speed = 10
+			// const finalLoop = setInterval(() =>{
+			// 	$(container).children('.digit').css('top', `${top}px`)
+			// 	top+= speed
+			// 	if(top > cutoff){
+			// 		$(container).children('.digit').css('top', `${cutoff}px`)
+			// 		clearInterval(finalLoop)
+			// 	} 
+			// },1000/60)
 		}, this.duration)
 		
 		//animate in the meantime
@@ -100,12 +108,15 @@ class Odometer{
 				){
 					this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
 					//increment numbers
-					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + 1
-					if(newVal === 9) newVal = 0
+					const increment = scrollDirection === 'down' ? -1 : 1
+					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
+					if(newVal > 9) newVal = 0
+					if(newVal < 0) newVal = 9
 					$($(htmlDigits[i]).children()[0]).html(newVal.toString())
 
-					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + 1
-					if(newVal === 9) newVal = 0
+					newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + increment
+					if(newVal > 9) newVal = 0
+					if(newVal < 0) newVal = 9
 					$($(htmlDigits[i]).children()[1]).html(newVal.toString())
 				} 
 				//apply new height
