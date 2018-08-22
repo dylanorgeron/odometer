@@ -70,30 +70,6 @@ class Odometer{
 		setTimeout(() => {
 			//stop the ride
 			spinning = false
-
-			// //finish the loop with our final result
-			// $(container).children('.digit').css('top', '0px')
-
-			// //move to next reset position
-			// for(let i = top; i <= cutoff; i++){
-			// 	$(container).children('.digit').css('top', `${i}px`)
-			// }
-			// //push result to html
-			// var resultPosition = scrollDirection === 'down' ? 0 : 1
-			// for(let i = 0; i < this.digits.length; i++){
-			// 	$($($(container).children('.digit')[i]).children()[resultPosition]).html(this.digits[i].toString())
-			// }
-			// //bring em in
-			// top = 0
-			// speed = 10
-			// const finalLoop = setInterval(() =>{
-			// 	$(container).children('.digit').css('top', `${top}px`)
-			// 	top+= speed
-			// 	if(top > cutoff){
-			// 		$(container).children('.digit').css('top', `${cutoff}px`)
-			// 		clearInterval(finalLoop)
-			// 	} 
-			// },1000/60)
 		}, this.duration)
 		
 		//animate in the meantime
@@ -130,7 +106,64 @@ class Odometer{
 			
 			//bail
 			if(!spinning) {
+				//ensure this is the last iteration
 				clearInterval(loop)
+
+				//move each digit to its reset position
+				const setProperValues = setInterval(() => {
+					let isFinished = true
+
+					for(let i = 0; i < htmlDigits.length; i++){
+						//reset with new number
+						if(
+							(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
+							(this.digitPositions[i] > cutoff && scrollDirection === 'down')
+						){
+							this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
+							//increment numbers
+							const increment = scrollDirection === 'down' ? -1 : 1
+							let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
+							if(newVal > 9) newVal = 0
+							if(newVal < 0) newVal = 9
+							$($(htmlDigits[i]).children()[1]).html(newVal.toString())
+		
+							$($(htmlDigits[i]).children()[0]).html(this.digits[i].toString())
+						} 
+						//apply new height
+						$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
+						if(scrollDirection === 'up'){
+							this.digitPositions[i] -= speed/10 - i * 2
+						}else{
+							this.digitPositions[i] += speed/10 + i * 2
+						}
+
+						//check if we are done
+						if(this.digits[i].toString() !== $($(htmlDigits[i]).children()[0]).html()){
+							isFinished = false
+						}
+					}
+					
+					if(isFinished){
+						clearInterval(setProperValues)
+						const scrollIntoView = setInterval(() => {
+							let isFinished = true
+							for(let i = 0; i < htmlDigits.length; i++){
+								if(this.digitPositions[i] < cutoff){
+									isFinished = false
+									//apply new height
+									$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
+									if(scrollDirection === 'up'){
+										this.digitPositions[i] -= speed/10 - i * 2
+									}else{
+										this.digitPositions[i] += speed/10 + i * 2
+									}
+								}
+							}
+							if(isFinished) clearInterval(scrollIntoView)
+						}, 1000/60)
+					}
+				}, 1000/60)
+
 			}
 		},1000/60)
 	}
