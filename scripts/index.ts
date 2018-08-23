@@ -98,9 +98,9 @@ class Odometer{
 				//apply new height
 				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 				if(scrollDirection === 'up'){
-					this.digitPositions[i] -= speed/10 - i * 2
+					this.digitPositions[i] -= speed/10 - i * 1.5
 				}else{
-					this.digitPositions[i] += speed/10 + i * 2
+					this.digitPositions[i] += speed/10 + i * 1.5
 				}
 			}
 			
@@ -149,11 +149,12 @@ class Odometer{
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 							if(scrollDirection === 'up'){
-								this.digitPositions[i] -= speed/10 - i * 2
+								this.digitPositions[i] -= speed/10 - i * 1.5 > 1 ? speed/10 - i * 1.5 : 1
 							}else{
-								this.digitPositions[i] += speed/10 + i * 2
+								this.digitPositions[i] += speed/10 + i * 1.5 > 1 ? speed/10 + i * 1.5 : 1
 							}
 							isFinished = false
+							if(speed > 1) speed -= .1
 						}
 					}
 					if(isFinished){ 
