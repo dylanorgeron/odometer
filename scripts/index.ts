@@ -50,6 +50,7 @@ class Odometer{
 		}
 	}
 	async update(){
+		const startTime = new Date().getTime()
 		const container = $(this.el).children('.odometer-container')
 		let height = parseInt($(this.el).css('font-size').slice(0, -2))
 		let scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
@@ -68,9 +69,8 @@ class Odometer{
 
 		//get us out eventually
 		setTimeout(() => {
-			//stop the ride
 			spinning = false
-		}, this.duration)
+		}, this.duration - 250)
 		
 		//animate in the meantime
 		const loop = setInterval(() => {
@@ -114,60 +114,57 @@ class Odometer{
 					let isFinished = true
 
 					for(let i = 0; i < htmlDigits.length; i++){
-						//reset with new number
-						if(
-							(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
-							(this.digitPositions[i] > cutoff && scrollDirection === 'down')
-						){
-							this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
-							//increment numbers
-							const increment = scrollDirection === 'down' ? -1 : 1
-							let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
-							if(newVal > 9) newVal = 0
-							if(newVal < 0) newVal = 9
-							$($(htmlDigits[i]).children()[1]).html(newVal.toString())
-		
-							$($(htmlDigits[i]).children()[0]).html(this.digits[i].toString())
-						} 
-						//apply new height
-						$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
-						if(scrollDirection === 'up'){
-							this.digitPositions[i] -= speed/10 - i * 2
-						}else{
-							this.digitPositions[i] += speed/10 + i * 2
-						}
+						//check if the end result digit is in the proper div
+						const properDigitIsShown = scrollDirection === 'down' ? 
+							$($(htmlDigits[i]).children()[0]).html().toString() === this.digits[i].toString() :
+							$($(htmlDigits[i]).children()[1]).html().toString() === this.digits[i].toString()
 
-						//check if we are done
-						if(this.digits[i].toString() !== $($(htmlDigits[i]).children()[0]).html()){
+						//check if the digit place is in the proper position
+						const digitIsInCorrectPosition = scrollDirection === 'down' ? 
+							this.digitPositions[i] >= cutoff : 
+							this.digitPositions[i] <= top
+						
+						if(!properDigitIsShown || !digitIsInCorrectPosition){
+							//reset with new number
+							if(
+								(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
+								(this.digitPositions[i] > cutoff && scrollDirection === 'down')
+							){
+								this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
+								//increment numbers
+								const increment = scrollDirection === 'down' ? -1 : 1
+								let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
+								if(newVal > 9) newVal = 0
+								if(newVal < 0) newVal = 9
+
+								if(scrollDirection === 'down'){
+									$($(htmlDigits[i]).children()[1]).html(newVal.toString())
+									$($(htmlDigits[i]).children()[0]).html(this.digits[i].toString())
+								}else{
+									$($(htmlDigits[i]).children()[0]).html(newVal.toString())
+									$($(htmlDigits[i]).children()[1]).html(this.digits[i].toString())
+								}
+								
+							} 
+							//apply new height
+							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
+							if(scrollDirection === 'up'){
+								this.digitPositions[i] -= speed/10 - i * 2
+							}else{
+								this.digitPositions[i] += speed/10 + i * 2
+							}
 							isFinished = false
 						}
 					}
-					
-					if(isFinished){
+					if(isFinished){ 
 						clearInterval(setProperValues)
-						const scrollIntoView = setInterval(() => {
-							let isFinished = true
-							for(let i = 0; i < htmlDigits.length; i++){
-								if(this.digitPositions[i] < cutoff){
-									isFinished = false
-									//apply new height
-									$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
-									if(scrollDirection === 'up'){
-										this.digitPositions[i] -= speed/10 - i * 2
-									}else{
-										this.digitPositions[i] += speed/10 + i * 2
-									}
-								}
-							}
-							if(isFinished) clearInterval(scrollIntoView)
-						}, 1000/60)
+						console.log(`Finished update in ${(new Date().getTime() - startTime) / 1000}s`)
 					}
 				}, 1000/60)
-
 			}
 		},1000/60)
 	}
 }
   
-const odometer = new Odometer(1000, 296, 2000, $('#odometer'))
+const odometer = new Odometer(1000, 296, 1000, $('#odometer'))
 odometer.update()
