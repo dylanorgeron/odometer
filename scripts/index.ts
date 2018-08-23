@@ -56,7 +56,7 @@ class Odometer{
 		let scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
 		let top = scrollDirection === 'down' ? height - height * 2 : 0
 		let cutoff = scrollDirection === 'down' ? 0 : height - height * 2
-		let speed = 10
+		let speed = 20
 
 		let spinning = true
 
@@ -70,7 +70,7 @@ class Odometer{
 		//get us out eventually
 		setTimeout(() => {
 			spinning = false
-		}, this.duration - 250)
+		}, this.duration - 500)
 		
 		//animate in the meantime
 		const loop = setInterval(() => {
@@ -149,9 +149,9 @@ class Odometer{
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 							if(scrollDirection === 'up'){
-								this.digitPositions[i] -= speed/10 - i * 1.5 > 1 ? speed/10 - i * 1.5 : 1
+								this.digitPositions[i] -= speed/10 - i * 1.5 > 3 ? speed/10 - i * 1.5 : 1
 							}else{
-								this.digitPositions[i] += speed/10 + i * 1.5 > 1 ? speed/10 + i * 1.5 : 1
+								this.digitPositions[i] += speed/10 + i * 1.5 > 3 ? speed/10 + i * 1.5 : 1
 							}
 							isFinished = false
 							if(speed > 1) speed -= .1
