@@ -60,6 +60,7 @@ class Odometer{
 		const scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
 		const top = scrollDirection === 'down' ? height - height * 2 : 0
 		const cutoff = scrollDirection === 'down' ? 0 : height - height * 2
+		const digitsToHide = this.startValue.toString().length - this.endValue.toString().length
 		const targetSpeed = 50
 		let speed = 1
 
@@ -158,7 +159,11 @@ class Odometer{
 									$($(htmlDigits[i]).children()[0]).html(newVal.toString())
 									$($(htmlDigits[i]).children()[1]).html(this.digits[i].toString())
 								}
-								
+
+								//set the leading 0s to be opacity 0
+								if(i < digitsToHide && this.digits[i] === 0){
+									$($(htmlDigits[i]).children()[0]).css('opacity', 0)	
+								}
 							} 
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
@@ -184,5 +189,5 @@ class Odometer{
 	}
 }
   
-const odometer = new Odometer(1000, 296, 2000, $('#odometer'))
+const odometer = new Odometer(1000, 296, 1000, $('#odometer'))
 odometer.update()
