@@ -93,7 +93,7 @@ class Odometer{
 					(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
 					(this.digitPositions[i] > cutoff && scrollDirection === 'down')
 				){
-					this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
+					this.digitPositions[i] = scrollDirection === 'down' ? 0 - height : 0
 					//increment numbers
 					const increment = scrollDirection === 'down' ? -1 : 1
 					let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
@@ -144,16 +144,22 @@ class Odometer{
 								(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
 								(this.digitPositions[i] > cutoff && scrollDirection === 'down')
 							){
+			
+								this.digitPositions[i] = scrollDirection === 'down' ? 0 - height : 0
+
 								//increment numbers
 								const increment = scrollDirection === 'down' ? -1 : 1
-								let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
-								if(newVal > 9) newVal = 0
-								if(newVal < 0) newVal = 9
 
 								if(scrollDirection === 'down'){
+									let newVal = parseInt($($(htmlDigits[i]).children()[1]).html()) + increment
+									if(newVal > 9) newVal = 0
+									if(newVal < 0) newVal = 9
 									$($(htmlDigits[i]).children()[1]).html(newVal.toString())
 									$($(htmlDigits[i]).children()[0]).html(this.digits[i].toString())
 								}else{
+									let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
+									if(newVal > 9) newVal = 0
+									if(newVal < 0) newVal = 9
 									$($(htmlDigits[i]).children()[0]).html(newVal.toString())
 									$($(htmlDigits[i]).children()[1]).html(this.digits[i].toString())
 								}
