@@ -60,7 +60,7 @@ class Odometer{
 		const scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
 		const top = scrollDirection === 'down' ? height - height * 2 : 0
 		const cutoff = scrollDirection === 'down' ? 0 : height - height * 2
-		const targetSpeed = 100
+		const targetSpeed = 50
 		let speed = 1
 
 
@@ -104,9 +104,9 @@ class Odometer{
 				//apply new height
 				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 				if(scrollDirection === 'up'){
-					this.digitPositions[i] -= (speed/10 + i)
+					this.digitPositions[i] -= (speed/10 + 2**i)
 				}else{
-					this.digitPositions[i] += (speed/10 + i)
+					this.digitPositions[i] += (speed/10 + 2**i)
 				}
 				if(speed < targetSpeed){
 					speed+=.5
@@ -163,9 +163,9 @@ class Odometer{
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 							if(scrollDirection === 'up'){
-								this.digitPositions[i] -= speed/10
+								this.digitPositions[i] -= (speed/10 + 2**i)
 							}else{
-								this.digitPositions[i] += speed/10
+								this.digitPositions[i] += (speed/10 + 2**i)
 							}
 							isFinished = false
 						}else{
