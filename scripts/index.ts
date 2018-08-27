@@ -21,15 +21,10 @@ class Odometer{
 
 			//build digit array for final result
 			if(this.endValue.toString().length > i){
-				this.digits.push(
-					parseInt(
-						this.endValue.toString()[i]	
-					)
-				)
+				this.digits.push(parseInt(this.endValue.toString()[i]))
 			}else{
 				this.digits.unshift(0)
 			}
-
 			this.digitPositions.push(0)
 
 			//generate html
@@ -81,7 +76,7 @@ class Odometer{
 		//get us out eventually
 		setTimeout(() => {
 			spinning = false
-		}, this.duration - 500)
+		}, this.duration - 250)
 		
 		//animate in the meantime
 		const loop = setInterval(() => {
@@ -109,9 +104,9 @@ class Odometer{
 				//apply new height
 				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 				if(scrollDirection === 'up'){
-					this.digitPositions[i] -= speed/10
+					this.digitPositions[i] -= (speed/10 + i)
 				}else{
-					this.digitPositions[i] += speed/10
+					this.digitPositions[i] += (speed/10 + i)
 				}
 				if(speed < targetSpeed){
 					speed+=.5
@@ -168,17 +163,16 @@ class Odometer{
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 							if(scrollDirection === 'up'){
-								this.digitPositions[i] -= speed
+								this.digitPositions[i] -= speed/10
 							}else{
-								this.digitPositions[i] += speed
+								this.digitPositions[i] += speed/10
 							}
 							isFinished = false
-							if(speed > .1){
-								speed-=.5
-							}
 						}else{
 							$(htmlDigits[i]).css('top', `${finalPosition}px`)
 						}
+						speed-=1
+						if(speed < 10) speed = 10
 					}
 					if(isFinished){ 
 						clearInterval(setProperValues)
