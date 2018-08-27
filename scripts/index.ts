@@ -13,8 +13,8 @@ class Odometer{
 		//create container
 		$(el).append('<div class="odometer-container"></div>')
 		const container = $(this.el).children('.odometer-container')
-		const height = $(this.el).css('font-size').slice(0, -2)
-		$(container).css('height', height)
+		const scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
+		const increment = scrollDirection === 'down' ? -1 : 1
 		
 		//populate digit places
 		for(let i = 0; i < this.startValue.toString().length; i++){
@@ -33,8 +33,8 @@ class Odometer{
 			this.digitPositions.push(0)
 
 			//generate html
-			let firstPos = this.startValue < this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
-			let secondPos = this.startValue > this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) - 1
+			let firstPos = this.startValue < this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) + increment
+			let secondPos = this.startValue > this.endValue ? this.startValue.toString()[i] : parseInt(this.startValue.toString()[i]) + increment
 
 			if(firstPos > 9) firstPos = 0
 			if(firstPos < 0) firstPos = 9
@@ -48,15 +48,26 @@ class Odometer{
 				</div>`
 			)
 		}
+
+		//get height based on font size of digits
+		const height = container.children('.digit')[0].children[0].clientHeight
+		$(container).css('height', height)
+		
+		//move digits to top or bottom depending on direction
+		if(scrollDirection === 'down'){
+			$($(container).children('.digit')).css('top', `${0 - height}`)
+		}
 	}
 	async update(){
 		const startTime = new Date().getTime()
 		const container = $(this.el).children('.odometer-container')
-		let height = parseInt($(this.el).css('font-size').slice(0, -2))
-		let scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
-		let top = scrollDirection === 'down' ? height - height * 2 : 0
-		let cutoff = scrollDirection === 'down' ? 0 : height - height * 2
-		let speed = 20
+		const height = container.children('.digit')[0].children[0].clientHeight
+		const scrollDirection = this.startValue > this.endValue ? 'down' : 'up'
+		const top = scrollDirection === 'down' ? height - height * 2 : 0
+		const cutoff = scrollDirection === 'down' ? 0 : height - height * 2
+		const targetSpeed = 100
+		let speed = 1
+
 
 		let spinning = true
 
@@ -98,9 +109,12 @@ class Odometer{
 				//apply new height
 				$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 				if(scrollDirection === 'up'){
-					this.digitPositions[i] -= speed/10 - i * 1.5
+					this.digitPositions[i] -= speed/10
 				}else{
-					this.digitPositions[i] += speed/10 + i * 1.5
+					this.digitPositions[i] += speed/10
+				}
+				if(speed < targetSpeed){
+					speed+=.5
 				}
 			}
 			
@@ -112,7 +126,7 @@ class Odometer{
 				//move each digit to its reset position
 				const setProperValues = setInterval(() => {
 					let isFinished = true
-
+					const finalPosition = scrollDirection === 'down' ? cutoff : top
 					for(let i = 0; i < htmlDigits.length; i++){
 						//check if the end result digit is in the proper div
 						const properDigitIsShown = scrollDirection === 'down' ? 
@@ -130,7 +144,6 @@ class Odometer{
 								(this.digitPositions[i] < cutoff && scrollDirection === 'up') ||
 								(this.digitPositions[i] > cutoff && scrollDirection === 'down')
 							){
-								this.digitPositions[i] = scrollDirection === 'down' ? height - height * 2 : 0
 								//increment numbers
 								const increment = scrollDirection === 'down' ? -1 : 1
 								let newVal = parseInt($($(htmlDigits[i]).children()[0]).html()) + increment
@@ -149,12 +162,16 @@ class Odometer{
 							//apply new height
 							$(htmlDigits[i]).css('top', `${this.digitPositions[i]}px`)
 							if(scrollDirection === 'up'){
-								this.digitPositions[i] -= speed/10 - i * 1.5 > 3 ? speed/10 - i * 1.5 : 1
+								this.digitPositions[i] -= speed
 							}else{
-								this.digitPositions[i] += speed/10 + i * 1.5 > 3 ? speed/10 + i * 1.5 : 1
+								this.digitPositions[i] += speed
 							}
 							isFinished = false
-							if(speed > 1) speed -= .1
+							if(speed > .1){
+								speed-=.5
+							}
+						}else{
+							$(htmlDigits[i]).css('top', `${finalPosition}px`)
 						}
 					}
 					if(isFinished){ 
@@ -167,5 +184,5 @@ class Odometer{
 	}
 }
   
-const odometer = new Odometer(1000, 296, 1000, $('#odometer'))
+const odometer = new Odometer(1000, 296, 2000, $('#odometer'))
 odometer.update()
