@@ -4,6 +4,7 @@ body{
   font-family: "Comic Sans MS"
 }
 .odometer-container{
+  border: 1px solid black;
   display: inline-block;
   position: relative;
   overflow: hidden;
@@ -12,4 +13,31 @@ body{
 .digit{
   display: inline-block;
   position: relative;
+}
+
+
+.spin-ease-in {
+  animation-name: cycle;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+}
+
+.spin-ease-out {
+  animation-duration: 1s;
+  animation-name: cycle;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-delay: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes cycle {
+  from {
+    top: 0;
+  }
+
+  to {
+    top: -630px;
+  }
 }
