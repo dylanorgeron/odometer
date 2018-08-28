@@ -39,19 +39,24 @@ class Odometer{
 		//now that html exists, set height of container
 		const height = container.children('.digit').children()[0].clientHeight
 		container.height(height)
-
 	}
 	async update(){
 		const container = this.el.children('.odometer-container')
 		const digits = container.children('.digit')
 
-		//spin her up
+		//add spin class
 		digits.addClass('spin-ease-in')
-		
+		//set animation duration
+		$('.spin-ease-in').css('animation-duration', '1s')
+
 		//calm down after a bit
 		setTimeout(() => {
-			digits.removeClass('spin-ease-in')
-			digits.addClass('spin-ease-out')
+			digits
+				.removeClass('spin-ease-in')
+				.addClass('spin-ease-out')
+				.css('animation-duration', `${this.duration/2}ms`)
+				.css('animation-delay', `${this.duration/2}ms`)
+
 			for(let i = 0; i < digits.length; i++){
 				$(digits[i]).children().last().html(this.endValue.toString()[i])
 			}

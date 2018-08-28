@@ -18,17 +18,14 @@ body{
 
 .spin-ease-in {
   animation-name: cycle;
-  animation-duration: 1s;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
 }
 
 .spin-ease-out {
-  animation-duration: 1s;
   animation-name: cycle;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
-  animation-delay: 1s;
   animation-fill-mode: forwards;
 }
 
